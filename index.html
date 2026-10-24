@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家的记忆</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans SC', sans-serif; background: #0d0d0d; color: #e0d6c2; overflow-x: hidden; }
+  .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: radial-gradient(ellipse at center, #1a1410 0%, #0d0d0d 70%); }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(139,90,43,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(139,90,43,0.08) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(200,160,80,0.05) 0%, transparent 60%); animation: heroGlow 8s ease-in-out infinite alternate; }
+  @keyframes heroGlow { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+  .spores { position: absolute; inset: 0; pointer-events: none; }
+  .spore { position: absolute; width: 4px; height: 4px; background: rgba(200,160,80,0.6); border-radius: 50%; animation: floatUp linear infinite; }
+  @keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+  .hero-content { position: relative; z-index: 1; padding: 2rem; }
+  .hero-badge { display: inline-block; padding: 0.4rem 1.5rem; border: 1px solid rgba(200,160,80,0.4); border-radius: 50px; font-size: 0.85rem; letter-spacing: 0.3em; color: #c8a050; margin-bottom: 2rem; backdrop-filter: blur(4px); }
+  .hero h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 900; letter-spacing: 0.15em; background: linear-gradient(180deg, #f0d68a 0%, #b8860b 50%, #8b6914 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 30px rgba(200,160,80,0.3)); margin-bottom: 1rem; }
+  .hero .subtitle { font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 300; color: rgba(224,214,194,0.6); letter-spacing: 0.2em; }
+  .scroll-hint { position: absolute; bottom: 2rem; z-index: 1; animation: bounce 2s ease-in-out infinite; }
+  .scroll-hint span { display: block; width: 24px; height: 24px; border-right: 2px solid rgba(200,160,80,0.5); border-bottom: 2px solid rgba(200,160,80,0.5); transform: rotate(45deg); }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+  .divider { text-align: center; padding: 3rem 1rem; position: relative; }
+  .divider::after { content: ''; display: block; width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, rgba(200,160,80,0.3), transparent); margin: 1rem auto 0; }
+  .divider h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.15em; color: #c8a050; }
+  .gallery-section { max-width: 1600px; margin: 0 auto; padding: 0 1rem 4rem; }
+  .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); grid-auto-rows: 280px; gap: 12px; }
+  .image-card { position: relative; overflow: hidden; border-radius: 4px; cursor: pointer; background: #1a1410; transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); }
+  .image-card:hover { transform: translateY(-4px); z-index: 2; }
+  .image-card:nth-child(5n+1) { grid-row: span 2; }
+  .image-card:nth-child(7n+3) { grid-row: span 2; }
+  .image-card:nth-child(11n+6) { grid-row: span 2; }
+  .image-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.6s; filter: brightness(0.85); }
+  .image-card:hover img { transform: scale(1.08); filter: brightness(1.05); }
+  .image-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%); pointer-events: none; opacity: 0; transition: opacity 0.4s; }
+  .image-card:hover::after { opacity: 1; }
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s; }
+  .lightbox.active { opacity: 1; pointer-events: all; }
+  .lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94); }
+  .lightbox.active img { transform: scale(1); }
+  .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; background: none; color: #fff; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+  .lightbox-close:hover { border-color: #c8a050; color: #c8a050; }
+  .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+  .lightbox-nav:hover { background: rgba(200,160,80,0.2); border-color: #c8a050; }
+  .lightbox-prev { left: 1.5rem; }
+  .lightbox-next { right: 1.5rem; }
+  .lightbox-counter { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.85rem; letter-spacing: 0.1em; }
+  .footer { text-align: center; padding: 4rem 1rem; border-top: 1px solid rgba(200,160,80,0.1); position: relative; }
+  .footer .heart { color: #c8a050; }
+  .footer p { color: rgba(224,214,194,0.4); font-size: 0.9rem; letter-spacing: 0.1em; line-height: 2; }
+  .footer .count { color: #c8a050; font-weight: 700; }
+  @media (max-width: 768px) { .image-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); grid-auto-rows: 200px; gap: 8px; } .image-card:nth-child(5n+1),.image-card:nth-child(7n+3),.image-card:nth-child(11n+6) { grid-row: span 1; } .image-card:nth-child(3n+2) { grid-row: span 2; } .lightbox-nav { width: 40px; height: 40px; font-size: 1.2rem; } .lightbox-prev { left: 0.5rem; } .lightbox-next { right: 0.5rem; } }
+  @media (max-width: 480px) { .hero h1 { font-size: 2.2rem; } .image-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-auto-rows: 180px; gap: 6px; } }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="spores" id="spores"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ Gallery ✦</div>
+    <h1>家的记忆</h1>
+    <p class="subtitle">珍藏每一个温暖瞬间</p>
+  </div>
+  <div class="scroll-hint"><span></span></div>
+</section>
+<div class="divider"><h2>Gallery</h2></div>
+<section class="gallery-section"><div class="image-grid" id="gallery"></div></section>
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lbClose">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lbPrev">&#10094;</button>
+  <button class="lightbox-nav lightbox-next" id="lbNext">&#10095;</button>
+  <img src="" alt="" id="lbImg">
+  <div class="lightbox-counter" id="lbCount"></div>
+</div>
+<div class="footer">
+  <p>Made with <span class="heart">&#9829;</span> for <strong>家的记忆</strong></p>
+  <p><span class="count" id="imgCount">--</span> images</p>
+</div>
+<script>
+(function(){
+  var s=document.getElementById('spores');
+  for(var i=0;i<40;i++){
+    var d=document.createElement('div');
+    d.className='spore';
+    d.style.left=Math.random()*100+'%';
+    d.style.animationDuration=(8+Math.random()*16)+'s';
+    d.style.animationDelay=Math.random()*12+'s';
+    d.style.width=d.style.height=(2+Math.random()*4)+'px';
+    s.appendChild(d);
+  }
+})();
+
+var imageFiles=["family-photo-001.jpg","family-photo-002.jpg","family-photo-003.jpg","family-photo-004.jpg","family-photo-005.jpg","family-photo-006.jpg","family-photo-007.jpg","family-photo-008.jpg","family-photo-009.jpg","family-photo-010.jpg","family-photo-011.jpg","family-photo-012.jpg","family-photo-013.jpg","family-photo-014.jpeg","family-photo-015.jpeg","family-photo-016.jpeg","family-photo-017.jpeg","family-photo-018.jpg","family-photo-019.jpg","family-photo-020.jpg","family-photo-021.jpg","family-photo-022.jpg","family-photo-023.jpg","family-photo-024.jpg","family-photo-025.jpg","family-photo-026.jpg","family-photo-027.jpg","family-photo-028.jpg","family-photo-029.jpg","family-photo-030.jpg","family-photo-031.jpg","family-photo-032.jpg","family-photo-033.jpg","family-photo-034.jpg","family-photo-035.jpg","family-photo-036.jpg","family-photo-037.jpg","family-photo-038.jpg","family-photo-039.jpg","family-photo-040.jpg","family-photo-041.jpg","family-photo-042.jpg","family-photo-043.jpg","family-photo-044.jpg","family-photo-045.jpg","family-photo-046.jpg","family-photo-047.jpg","family-photo-048.jpg","family-photo-049.jpg","family-photo-050.jpg","family-photo-051.jpg","family-photo-052.jpg","family-photo-053.jpg","family-photo-054.jpg","family-photo-055.jpg","family-photo-056.jpg","family-photo-057.jpg","family-photo-058.jpg","family-photo-059.jpg","family-photo-060.jpg","family-photo-061.jpg","family-photo-062.jpg","family-photo-063.jpg","family-photo-064.jpg","family-photo-065.jpg","family-photo-066.jpg","family-photo-067.jpg","family-photo-068.jpg","family-photo-069.jpg","family-photo-070.jpg","family-photo-071.jpg","family-photo-072.jpg","family-photo-073.jpg","family-photo-074.jpg","family-photo-075.jpg","family-photo-076.jpg","family-photo-077.jpg","family-photo-078.jpg","family-photo-079.jpg","family-photo-080.jpg","family-photo-081.jpg","family-photo-082.jpg","family-photo-083.jpg","family-photo-084.jpg","family-photo-085.jpg","family-photo-086.jpg","family-photo-087.jpg","family-photo-088.jpg","family-photo-089.jpg","family-photo-090.jpg","family-photo-091.jpg","family-photo-092.jpg","family-photo-093.jpg","family-photo-094.jpg","family-photo-095.jpg","family-photo-096.jpg","family-photo-097.jpg","family-photo-098.jpg","family-photo-099.jpg","family-photo-100.jpg","family-photo-101.jpg","family-photo-102.jpg","family-photo-103.jpg","family-photo-104.jpg","family-photo-105.jpg","family-photo-106.jpg","family-photo-107.jpg","family-photo-108.jpg","family-photo-109.jpg","family-photo-110.jpg","family-photo-111.jpg","family-photo-112.jpg","family-photo-113.jpg","family-photo-114.jpg","family-photo-115.jpg","family-photo-116.jpg","family-photo-117.jpg","family-photo-118.jpg","family-photo-119.jpg","family-photo-120.jpg","family-photo-121.jpg","family-photo-122.jpg","family-photo-123.jpg","family-photo-124.jpg","family-photo-125.jpg","family-photo-126.jpg","family-photo-127.jpg","family-photo-128.jpg","family-photo-129.jpg","family-photo-130.jpg","family-photo-131.jpg","family-photo-132.jpg","family-photo-133.jpg","family-photo-134.jpg"];
+var gallery=document.getElementById('gallery');
+imageFiles.forEach(function(file,index){
+  var card=document.createElement('div');
+  card.className='image-card';
+  var img=document.createElement('img');
+  img.src='images/'+file;
+  img.alt='Image '+(index+1);
+  img.loading='lazy';
+  img.addEventListener('click',function(){openLightbox(index);});
+  card.appendChild(img);
+  gallery.appendChild(card);
+});
+document.getElementById('imgCount').textContent=imageFiles.length;
+
+var lightbox=document.getElementById('lightbox');
+var lbImg=document.getElementById('lbImg');
+var lbCount=document.getElementById('lbCount');
+var currentIndex=0;
+function openLightbox(index){
+  currentIndex=index;
+  lbImg.src='images/'+imageFiles[index];
+  lbCount.textContent=(index+1)+' / '+imageFiles.length;
+  lightbox.classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  lightbox.classList.remove('active');
+  document.body.style.overflow='';
+}
+function prevImage(){
+  currentIndex=(currentIndex-1+imageFiles.length)%imageFiles.length;
+  lbImg.src='images/'+imageFiles[currentIndex];
+  lbCount.textContent=(currentIndex+1)+' / '+imageFiles.length;
+}
+function nextImage(){
+  currentIndex=(currentIndex+1)%imageFiles.length;
+  lbImg.src='images/'+imageFiles[currentIndex];
+  lbCount.textContent=(currentIndex+1)+' / '+imageFiles.length;
+}
+document.getElementById('lbClose').addEventListener('click',closeLightbox);
+document.getElementById('lbPrev').addEventListener('click',prevImage);
+document.getElementById('lbNext').addEventListener('click',nextImage);
+lightbox.addEventListener('click',function(e){if(e.target===lightbox)closeLightbox();});
+document.addEventListener('keydown',function(e){
+  if(!lightbox.classList.contains('active'))return;
+  if(e.key==='Escape')closeLightbox();
+  if(e.key==='ArrowLeft')prevImage();
+  if(e.key==='ArrowRight')nextImage();
+});
+</script>
+</body>
+</html>
